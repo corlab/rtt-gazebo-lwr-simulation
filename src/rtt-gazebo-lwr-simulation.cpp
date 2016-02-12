@@ -15,17 +15,17 @@ RTTGazeboLWRSimulation::RTTGazeboLWRSimulation(std::string const& name) :
 		DEFAULT_TIP_LINK) {
 
 	this->ports()->addPort("JointPositionGazeboCommand",
-			port_JointPositionGazeboCommand).doc("");
+			port_JointPositionGazeboCommand).doc("Output for JointPosition-cmds from Orocos to Gazebo world.");
 	this->ports()->addPort("JointVelocityGazeboCommand",
-			port_JointVelocityGazeboCommand).doc("");
+			port_JointVelocityGazeboCommand).doc("Output for JointVelocity-cmds from Orocos to Gazebo world.");
 	this->ports()->addPort("JointTorqueGazeboCommand",
-			port_JointTorqueGazeboCommand).doc("");
+			port_JointTorqueGazeboCommand).doc("Output for JointTorque-cmds from Orocos to Gazebo world.");
 
 	this->ports()->addPort("JointPositionGazebo", port_JointPositionGazebo).doc(
-			"");
+			"Input for JointPosition-fbs from Gazebo to Orocos world.");
 	this->ports()->addPort("JointVelocityGazebo", port_JointVelocityGazebo).doc(
-			"");
-	this->ports()->addPort("JointTorqueGazebo", port_JointTorqueGazebo).doc("");
+			"Input for JointVelocity-fbs from Gazebo to Orocos world.");
+	this->ports()->addPort("JointTorqueGazebo", port_JointTorqueGazebo).doc("Input for JointTorque-fbs from Gazebo to Orocos world.");
 
 	// input ports to the simulation from the controller-side
 	this->ports()->addPort("JointImpedanceCommand", port_JointImpedanceCommand).doc(
@@ -50,14 +50,14 @@ RTTGazeboLWRSimulation::RTTGazeboLWRSimulation(std::string const& name) :
 
 //    this->ports()->addPort("RobotState", port_RobotState).doc("");
 //    this->ports()->addPort("FRIState", port_FRIState).doc("");
-	this->ports()->addPort("JointVelocity", port_JointVelocity).doc("");
+	this->ports()->addPort("JointVelocity", port_JointVelocity).doc("Output for JointVelocity-fbs from Gazebo to Orocos world.");
 //	this->ports()->addPort("CartesianVelocity", port_CartesianVelocity).doc("");
-	this->ports()->addPort("CartesianPosition", port_CartesianPosition).doc("");
+	this->ports()->addPort("CartesianPosition", port_CartesianPosition).doc("Output for Cartesian-Endeff-Position-fbs from Gazebo to Orocos world.");
 //	this->ports()->addPort("MassMatrix", port_MassMatrix).doc("");
 //   this->ports()->addPort("Jacobian", port_Jacobian).doc("");
-	this->ports()->addPort("JointTorque", port_JointTorque).doc("");
+	this->ports()->addPort("JointTorque", port_JointTorque).doc("Output for JointTorque-fbs from Gazebo to Orocos world.");
 	this->ports()->addPort("GravityTorque", port_GravityTorque).doc("");
-	this->ports()->addPort("JointPosition", port_JointPosition).doc("");
+	this->ports()->addPort("JointPosition", port_JointPosition).doc("Output for JointPosition-fbs from Gazebo to Orocos world.");
 
 //    this->ports()->addPort("JointState",port_JointState).doc(""); // ? TODO
 //    this->ports()->addPort("JointStateCommand",port_JointStateCommand).doc(""); // ? TODO
@@ -434,7 +434,7 @@ void RTTGazeboLWRSimulation::updateHook() {
 	/* ### execute solvers for inv.Dynamics */
 	// calculate matrices H (inertia),C(coriolis) and G(gravitation)
 	id_dyn_solver->JntToMass(jntArrVelConfig_q.q, H);
-	mass_ = H.data; // rezise this in configHook
+	mass_ = H.data; // resize this in configHook
 
 //	// getting the current torques based on the assumption that f_ext is zero TODO
 //	std::fill(f_ext.begin(), f_ext.end(), Wrench::Zero());
@@ -561,8 +561,9 @@ void RTTGazeboLWRSimulation::createGazeboTrqCommandAccordingToCtrlModes(
 
 void RTTGazeboLWRSimulation::tunnelDirectTorque() {
 	// not sending all the time, because force is going to be accumulated.
-	if (jnt_trq_cmd_fs == NewData)
+	if (jnt_trq_cmd_fs == NewData) {
 		joint_torque_gazebo_cmd_tmp[FRI_CTRL_DIRECT_TORQUE] = joint_trq_cmd_;
+	}
 }
 
 void RTTGazeboLWRSimulation::convertPoseKDL2PoseRCI(const KDL::Frame& frame,
