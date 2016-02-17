@@ -29,7 +29,8 @@ orocos_component(RTTGazeboLWRSimulation rtt-gazebo-lwr-simulation.hpp rtt-gazebo
 #
 # Installs in the include/orocos/myrobot/ directory
 #
-orocos_install_headers(rtt-gazebo-lwr-simulation)
+orocos_install_headers(rtt-gazebo-lwr-simulation.hpp)
+orocos_install_headers(parsertools/KDLParser.hpp)
 #
 # You may add multiple orocos_install_headers statements.
 
