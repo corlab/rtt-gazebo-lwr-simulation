@@ -402,7 +402,9 @@ void RTTGazeboLWRSimulation::updateHook() {
 
 	//FlowStatus fs_fri_to_krl = port_ToKRL.read(fri_to_krl);
 	FlowStatus fs_jnt_imp_cmd = port_JointImpedanceCommand.read(joint_imp_cmd_);
-	clampImpedance(joint_imp_cmd_, impedance_limits_);
+	if (fs_jnt_imp_cmd == RTT::NewData) {
+		clampImpedance(joint_imp_cmd_, impedance_limits_);
+	}
 
 //
 /////* ### Handle and process incoming commands */
@@ -620,10 +622,14 @@ void RTTGazeboLWRSimulation::clampImpedance(rci::JointImpedancePtr imp,
 		return;
 	}
 
+
 	for (int i = 0; i < limits->getDimension(); i++) {
+		l(Error) << "Imp: " << imp->asDouble(i * 2) << ", " << imp->asDouble(i * 2 + 1) << endlog();
 		kp_[i] = clamp(imp->asDouble(i * 2), 0.0, limits->asDouble(i * 2));
 		kd_[i] = clamp(imp->asDouble(i * 2 + 1), 0.0,
 				limits->asDouble(i * 2 + 1));
+
+		l(Error) << "Imp Clamped: " << kp_[i] << ", " << kd_[i] << endlog();
 	}
 }
 
