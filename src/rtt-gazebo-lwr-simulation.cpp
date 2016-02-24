@@ -119,7 +119,7 @@ bool RTTGazeboLWRSimulation::configureHook() {
 	port_JointPosition.setDataSample(
 			rci::JointAngles::create(DEFAULT_NR_JOINTS_LWR, 0.0));
 
-	// initialize joint data storages
+	// initialize joint data storages // TODO not needed!
 	initJointStateFromKDLCHain(kdl_chain_, joint_state_);
 	initJointStateFromKDLCHain(kdl_chain_, joint_state_cmd_);
 	initJointStateFromKDLCHain(kdl_chain_, joint_state_gravity_);
@@ -138,6 +138,11 @@ bool RTTGazeboLWRSimulation::configureHook() {
 
 	joint_torque_gravity = rci::JointTorques::create(DEFAULT_NR_JOINTS_LWR,
 			0.0);
+
+	joint_torque_gazebo = rci::JointTorques::create(DEFAULT_NR_JOINTS_LWR,
+			0.0);
+	joint_position_gazebo = rci::JointAngles::create(DEFAULT_NR_JOINTS_LWR, 0.0);
+	joint_velocity_gazebo = rci::JointVelocities::create(DEFAULT_NR_JOINTS_LWR, 0.0);
 
 	// TODO check default impedance params.
 	impedance_limits_ = rci::JointImpedance::create(
@@ -381,17 +386,18 @@ void RTTGazeboLWRSimulation::updateHook() {
 //
 /////* ####### read robot feedback from Gazebo ####### */
 	if (port_JointPositionGazebo.connected()
-			|| port_JointVelocityGazebo.connected()
-			|| port_JointTorqueGazebo.connected()) {
+			&& port_JointVelocityGazebo.connected()
+			&& port_JointTorqueGazebo.connected()) {
 
 		fs_p = port_JointPositionGazebo.read(joint_position_gazebo);
 		fs_v = port_JointVelocityGazebo.read(joint_velocity_gazebo);
 		fs_g = port_JointTorqueGazebo.read(joint_torque_gazebo);
 
 		if (fs_g == NoData || fs_p == NoData || fs_v == NoData) {
-			log(Warning) << getName() << ": NoData" << endlog();
 			return;
 		}
+	} else {
+		return;
 	}
 
 //
