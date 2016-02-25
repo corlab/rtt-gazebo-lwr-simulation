@@ -12,7 +12,7 @@ using namespace Orocos;
 
 RTTGazeboLWRSimulation::RTTGazeboLWRSimulation(std::string const& name) :
 		TaskContext(name), chain_root_link_name(DEFAULT_ROOT_LINK), chain_tip_link_name(
-		DEFAULT_TIP_LINK) {
+		DEFAULT_TIP_LINK), gravity_vector(0.,0.,-9.81289) {
 
 	this->ports()->addPort("JointPositionGazeboCommand",
 			port_JointPositionGazeboCommand).doc(
