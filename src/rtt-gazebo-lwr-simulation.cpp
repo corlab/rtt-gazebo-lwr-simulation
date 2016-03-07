@@ -125,7 +125,8 @@ bool RTTGazeboLWRSimulation::configureHook() {
 	initJointStateFromKDLCHain(kdl_chain_, joint_state_gravity_);
 	initJointStateFromKDLCHain(kdl_chain_, joint_state_dyn_);
 
-	setInitialJointPosition(rci::JointAngles::create(7, 0.0));
+
+	setInitialJointPosition(rci::JointAngles::create(7, 0.5));
 
 	joint_pos_cmd_ = rci::JointAngles::create(DEFAULT_NR_JOINTS_LWR, 0.0);
 	jnt_pos_cmd_.resize(joint_pos_cmd_->getDimension());
