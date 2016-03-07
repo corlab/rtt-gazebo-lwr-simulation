@@ -12,7 +12,7 @@ using namespace Orocos;
 
 RTTGazeboLWRSimulation::RTTGazeboLWRSimulation(std::string const& name) :
 		TaskContext(name), chain_root_link_name(DEFAULT_ROOT_LINK), chain_tip_link_name(
-		DEFAULT_TIP_LINK), gravity_vector(0.,0.,-9.81289) {
+		DEFAULT_TIP_LINK), gravity_vector(0., 0., -9.81289), once(true) {
 
 	this->ports()->addPort("JointPositionGazeboCommand",
 			port_JointPositionGazeboCommand).doc(
@@ -43,6 +43,14 @@ RTTGazeboLWRSimulation::RTTGazeboLWRSimulation(std::string const& name) :
 			&RTTGazeboLWRSimulation::parseURDFforKDL, this, OwnThread).doc(
 			"Parses a URDF string to create a KDL::Tree.").arg("urdfString",
 			"URDF string to parse.");
+
+	this->addOperation("setInitialJointPosition",
+			&RTTGazeboLWRSimulation::setInitialJointPositionOutside, this,
+			OwnThread).doc("Set the initial configuration of the robot").arg(
+			"j0", "value for joint 0").arg("j1", "value for joint 1").arg("j2",
+			"value for joint 2").arg("j3", "value for joint 3").arg("j4",
+			"value for joint 4").arg("j5", "value for joint 5").arg("j6",
+			"value for joint 6");
 
 	this->addOperation("setControlMode",
 			&RTTGazeboLWRSimulation::setControlMode, this, OwnThread).doc(
@@ -125,9 +133,6 @@ bool RTTGazeboLWRSimulation::configureHook() {
 	initJointStateFromKDLCHain(kdl_chain_, joint_state_gravity_);
 	initJointStateFromKDLCHain(kdl_chain_, joint_state_dyn_);
 
-
-	setInitialJointPosition(rci::JointAngles::create(7, 0.5));
-
 	joint_pos_cmd_ = rci::JointAngles::create(DEFAULT_NR_JOINTS_LWR, 0.0);
 	jnt_pos_cmd_.resize(joint_pos_cmd_->getDimension());
 
@@ -140,10 +145,11 @@ bool RTTGazeboLWRSimulation::configureHook() {
 	joint_torque_gravity = rci::JointTorques::create(DEFAULT_NR_JOINTS_LWR,
 			0.0);
 
-	joint_torque_gazebo = rci::JointTorques::create(DEFAULT_NR_JOINTS_LWR,
+	joint_torque_gazebo = rci::JointTorques::create(DEFAULT_NR_JOINTS_LWR, 0.0);
+	joint_position_gazebo = rci::JointAngles::create(DEFAULT_NR_JOINTS_LWR,
 			0.0);
-	joint_position_gazebo = rci::JointAngles::create(DEFAULT_NR_JOINTS_LWR, 0.0);
-	joint_velocity_gazebo = rci::JointVelocities::create(DEFAULT_NR_JOINTS_LWR, 0.0);
+	joint_velocity_gazebo = rci::JointVelocities::create(DEFAULT_NR_JOINTS_LWR,
+			0.0);
 
 	// TODO check default impedance params.
 	impedance_limits_ = rci::JointImpedance::create(
@@ -223,6 +229,21 @@ bool RTTGazeboLWRSimulation::configureHook() {
 
 	l(Info) << "configured !" << endlog();
 	return true;
+}
+
+void RTTGazeboLWRSimulation::setInitialJointPositionOutside(double j0,
+		double j1, double j2, double j3, double j4, double j5, double j6) {
+	rci::JointAnglesPtr tmp = rci::JointAngles::create(7, 0.0);
+	tmp->setValue(0, j0);
+	tmp->setValue(1, j1);
+	tmp->setValue(2, j2);
+	tmp->setValue(3, j3);
+	tmp->setValue(4, j4);
+	tmp->setValue(5, j5);
+	tmp->setValue(6, j6);
+
+	l(Info) << "Setting joint Position to " << tmp->print() << endlog();
+	port_JointPositionGazeboCommand.write(tmp);
 }
 
 void RTTGazeboLWRSimulation::setInitialJointPosition(
@@ -375,6 +396,12 @@ void RTTGazeboLWRSimulation::resetJointImpedanceGains() {
 }
 
 void RTTGazeboLWRSimulation::updateHook() {
+	// start by setting the initial position:
+	if (once) {
+		setInitialJointPosition(rci::JointAngles::create(7, 0.5));
+		once = false;
+	}
+
 	// do some timing stuff for debugging
 	static double last_update_time_sim;
 	double rtt_time_ = 1E-9
@@ -628,7 +655,6 @@ void RTTGazeboLWRSimulation::clampImpedance(rci::JointImpedancePtr imp,
 				<< imp->getDimension() << endlog();
 		return;
 	}
-
 
 	for (int i = 0; i < limits->getDimension(); i++) {
 //		l(Error) << "Imp: " << imp->asDouble(i * 2) << ", " << imp->asDouble(i * 2 + 1) << endlog();

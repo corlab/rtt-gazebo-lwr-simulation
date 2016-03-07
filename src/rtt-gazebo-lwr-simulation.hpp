@@ -61,7 +61,9 @@ protected:
 	void setJointImpedanceMode();
 	void setCartesianImpedanceMode();
 	void resetJointImpedanceGains();
-	void setInitialJointPosition(const std::vector<double> j_init);
+	void setInitialJointPosition(const rci::JointAnglesPtr j_init);
+	void setInitialJointPositionOutside(double j0, double j1, double j2, double j3, double j4, double j5, double j6);
+
 	void resetCartesianImpedanceGains();
 	void initJointStateFromKDLCHain(const KDL::Chain& kdl_chain,
 			JointState& joint_state);
@@ -230,6 +232,8 @@ protected:
 	// period of the simulation
 	double period_sim_;
 	double read_start, write_start, read_duration;
+
+	bool once;
 
 };
 #endif
