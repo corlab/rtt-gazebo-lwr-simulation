@@ -47,10 +47,7 @@ RTTGazeboLWRSimulation::RTTGazeboLWRSimulation(std::string const& name) :
 	this->addOperation("setInitialJointPosition",
 			&RTTGazeboLWRSimulation::setInitialJointPositionOutside, this,
 			OwnThread).doc("Set the initial configuration of the robot").arg(
-			"j0", "value for joint 0").arg("j1", "value for joint 1").arg("j2",
-			"value for joint 2").arg("j3", "value for joint 3").arg("j4",
-			"value for joint 4").arg("j5", "value for joint 5").arg("j6",
-			"value for joint 6");
+			"j", "value for joints");
 
 	this->addOperation("setControlMode",
 			&RTTGazeboLWRSimulation::setControlMode, this, OwnThread).doc(
@@ -231,16 +228,15 @@ bool RTTGazeboLWRSimulation::configureHook() {
 	return true;
 }
 
-void RTTGazeboLWRSimulation::setInitialJointPositionOutside(double j0,
-		double j1, double j2, double j3, double j4, double j5, double j6) {
-	rci::JointAnglesPtr tmp = rci::JointAngles::create(7, 0.0);
-	tmp->setValue(0, j0);
-	tmp->setValue(1, j1);
-	tmp->setValue(2, j2);
-	tmp->setValue(3, j3);
-	tmp->setValue(4, j4);
-	tmp->setValue(5, j5);
-	tmp->setValue(6, j6);
+void RTTGazeboLWRSimulation::setInitialJointPositionOutside(double j) {
+	rci::JointAnglesPtr tmp = rci::JointAngles::create(7, j);
+//	tmp->setValue(0, j);
+//	tmp->setValue(1, j);
+//	tmp->setValue(2, j);
+//	tmp->setValue(3, j);
+//	tmp->setValue(4, j);
+//	tmp->setValue(5, j);
+//	tmp->setValue(6, j);
 
 	l(Info) << "Setting joint Position to " << tmp->print() << endlog();
 	port_JointPositionGazeboCommand.write(tmp);

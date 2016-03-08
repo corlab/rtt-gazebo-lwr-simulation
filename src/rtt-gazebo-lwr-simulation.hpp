@@ -61,7 +61,7 @@ protected:
 	void setJointImpedanceMode();
 	void setCartesianImpedanceMode();
 	void resetJointImpedanceGains();
-	void setInitialJointPositionOutside(double j0, double j1, double j2, double j3, double j4, double j5, double j6);
+	void setInitialJointPositionOutside(double j);
 
 	void resetCartesianImpedanceGains();
 	void initJointStateFromKDLCHain(const KDL::Chain& kdl_chain,
