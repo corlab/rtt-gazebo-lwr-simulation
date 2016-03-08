@@ -393,10 +393,10 @@ void RTTGazeboLWRSimulation::resetJointImpedanceGains() {
 
 void RTTGazeboLWRSimulation::updateHook() {
 	// start by setting the initial position:
-	if (once) {
-		setInitialJointPosition(rci::JointAngles::create(7, 0.5));
-		once = false;
-	}
+//	if (once) {
+//		setInitialJointPosition(rci::JointAngles::create(7, 0.5));
+//		once = false;
+//	}
 
 	// do some timing stuff for debugging
 	static double last_update_time_sim;
